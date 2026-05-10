@@ -1,0 +1,70 @@
+Basic Pipeline syntax :
+pipeline {
+    agent any
+    stages {
+        stage ("code") {
+            steps {
+                echo "Welcome to My first pipeline type job"
+            }
+        }
+    }
+}
+
+
+
+
+Multi stage pipeline :
+
+pipeline {
+    agent any
+    stages {
+        stage ("code") {
+            steps {
+                echo "Welcome to My first pipeline type job"
+            }
+        }
+        stage ("Build") {
+            steps {
+                echo "This is build stage"
+            }
+        }
+        stage ("Test") {
+            steps {
+                echo "This is testing stage"
+            }
+        }
+    }
+}
+
+
+
+Pipeline to deploy an application :
+
+pipeline {
+    agent any
+    tools {
+        maven 'mymaven'
+    }
+    stages {
+        stage ("code") {
+            steps {
+                git 'https://github.com/devops0014/one.git'
+            }
+        }
+        stage ("Build") {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage ("Artifact") {
+            steps {
+                nexusArtifactUploader artifacts: [[artifactId: 'myweb', classifier: '', file: 'target/myweb-8.7.1.war', type: 'war']], credentialsId: 'artifact', groupId: 'in.javahome', nexusUrl: '54.85.217.44:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'myrepo', version: '8.7.1'
+            }
+        }
+        stage ("Deploy") {
+            steps {
+                deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'appserver', path: '', url: 'http://34.226.197.253:8080')], contextPath: 'myapp', war: 'target/*.war'
+            }
+        }
+    }
+}
